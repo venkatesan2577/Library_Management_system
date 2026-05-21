@@ -1,0 +1,318 @@
+package project;
+import java.awt.*;
+import javax.swing.*;
+
+public class LibraryManagement {
+	
+	    // Database credentials (not used here for simplicity)
+	    static final String url = "jdbc:mysql://localhost:3306/library";
+	    static final String user = "root";
+	    static final String pass = "2577";
+
+	    // Issue tracking
+	    static int issuedCount = 0; // max 3 books per user
+
+	    // Stock of each book (max 3 copies)
+	    static int javaStock = 3;
+	    static int pythonStock = 3;
+	    static int dsStock = 3;
+	    static int dbmsStock = 3;
+
+	    // ================= LOGIN PAGE =================
+	    public static void loginPage() {
+	        JFrame f = new JFrame("Library Login");
+	        f.setLayout(null);
+
+	        Label title = new Label("Library Management System");
+	        title.setBounds(150, 40, 400, 40);
+	        title.setFont(new Font("Arial", Font.BOLD, 26));
+	        f.add(title);
+
+	        Label u = new Label("Username:");
+	        u.setBounds(150, 120, 100, 30);
+	        f.add(u);
+
+	        TextField ut = new TextField();
+	        ut.setBounds(280, 120, 200, 30);
+	        f.add(ut);
+
+	        Label p = new Label("Password:");
+	        p.setBounds(150, 170, 100, 30);
+	        f.add(p);
+
+	        TextField pt = new TextField();
+	        pt.setBounds(280, 170, 200, 30);
+	        pt.setEchoChar('*');
+	        f.add(pt);
+
+	        Button login = new Button("Login");
+	        login.setBounds(200, 230, 100, 30);
+	        f.add(login);
+
+	        Button signup = new Button("Sign Up");
+	        signup.setBounds(330, 230, 100, 30);
+	        f.add(signup);
+
+	        // LOGIN (simplified, does not use database)
+	        login.addActionListener(e -> {
+	            if (!ut.getText().isEmpty() && !pt.getText().isEmpty()) {
+	                JOptionPane.showMessageDialog(f, "Login Successful");
+	                f.dispose();
+	                menuPage();
+	            } else {
+	                JOptionPane.showMessageDialog(f, "Invalid Login");
+	            }
+	        });
+
+	        signup.addActionListener(e -> {
+	            JOptionPane.showMessageDialog(f, "Account Created");
+	        });
+
+	        f.setSize(600, 350);
+	        f.setVisible(true);
+	    }
+
+	    // ================= MENU PAGE =================
+	    public static void menuPage() {
+	        JFrame f = new JFrame("Menu");
+	        f.setLayout(null);
+
+	        JButton view = new JButton("View Books");
+	        view.setBounds(150, 40, 200, 35);
+	        f.add(view);
+
+	        JButton search = new JButton("Search Book");
+	        search.setBounds(150, 85, 200, 35);
+	        f.add(search);
+
+	        JButton issue = new JButton("Issue Book");
+	        issue.setBounds(150, 130, 200, 35);
+	        f.add(issue);
+
+	        JButton ret = new JButton("Return Book");
+	        ret.setBounds(150, 175, 200, 35);
+	        f.add(ret);
+
+	        JButton logout = new JButton("Logout");
+	        logout.setBounds(150, 220, 200, 35);
+	        f.add(logout);
+
+	        view.addActionListener(e -> { f.dispose(); viewBooks(); });
+	        search.addActionListener(e -> { f.dispose(); searchBook(); });
+	        issue.addActionListener(e -> { f.dispose(); issueBook(); });
+	        ret.addActionListener(e -> { f.dispose(); returnBook(); });
+	        logout.addActionListener(e -> { f.dispose(); loginPage(); });
+
+	        f.setSize(500, 320);
+	        f.setVisible(true);
+	    }
+
+	    // ================= VIEW BOOKS =================
+	    public static void viewBooks() {
+	        JFrame f = new JFrame("View Books");
+	        f.setLayout(null);
+
+	        String[][] data = {
+	                {"1", "Java Programming", javaStock > 0 ? "Available" : "Out of Stock"},
+	                {"2", "Python Basics", pythonStock > 0 ? "Available" : "Out of Stock"},
+	                {"3", "Data Structures", dsStock > 0 ? "Available" : "Out of Stock"},
+	                {"4", "DBMS", dbmsStock > 0 ? "Available" : "Out of Stock"}
+	        };
+
+	        JTable table = new JTable(data, new String[]{"ID", "Book Name", "Status"});
+	        JScrollPane sp = new JScrollPane(table);
+	        sp.setBounds(40, 30, 400, 150);
+	        f.add(sp);
+
+	        JButton back = new JButton("Back");
+	        back.setBounds(180, 200, 100, 30);
+	        f.add(back);
+
+	        back.addActionListener(e -> { f.dispose(); menuPage(); });
+
+	        f.setSize(500, 300);
+	        f.setVisible(true);
+	    }
+
+	    // ================= SEARCH BOOK =================
+	    public static void searchBook() {
+	        JFrame f = new JFrame("Search Book");
+	        f.setLayout(null);
+
+	        JLabel l = new JLabel("Enter Book Name:");
+	        l.setBounds(50, 50, 150, 30);
+	        f.add(l);
+
+	        JTextField t = new JTextField();
+	        t.setBounds(200, 50, 180, 30);
+	        f.add(t);
+
+	        JButton search = new JButton("Search");
+	        search.setBounds(100, 100, 100, 30);
+	        f.add(search);
+
+	        JButton back = new JButton("Back");
+	        back.setBounds(230, 100, 100, 30);
+	        f.add(back);
+
+	        search.addActionListener(e -> {
+	            String b = t.getText().toLowerCase();
+	            boolean available = false;
+	            if (b.contains("java") && javaStock > 0) available = true;
+	            if (b.contains("python") && pythonStock > 0) available = true;
+	            if (b.contains("data") && dsStock > 0) available = true;
+	            if (b.contains("dbms") && dbmsStock > 0) available = true;
+
+	            JOptionPane.showMessageDialog(f, available ? "Book Available" : "Book Not Found / Out of Stock");
+	        });
+
+	        back.addActionListener(e -> { f.dispose(); menuPage(); });
+
+	        f.setSize(450, 200);
+	        f.setVisible(true);
+	    }
+
+	    // ================= ISSUE BOOK =================
+	    public static void issueBook() {
+	        JFrame f = new JFrame("Issue Book");
+	        f.setLayout(null);
+
+	        JLabel l = new JLabel("Enter Book ID:");
+	        l.setBounds(50, 50, 150, 30);
+	        f.add(l);
+
+	        JTextField t = new JTextField();
+	        t.setBounds(200, 50, 100, 30);
+	        f.add(t);
+
+	        JButton issue = new JButton("Issue");
+	        issue.setBounds(70, 100, 100, 30);
+	        f.add(issue);
+
+	        JButton back = new JButton("Back");
+	        back.setBounds(200, 100, 100, 30);
+	        f.add(back);
+
+	        issue.addActionListener(e -> {
+	            int id;
+	            try {
+	                id = Integer.parseInt(t.getText());
+	            } catch (Exception ex) {
+	                JOptionPane.showMessageDialog(f, "Invalid Book ID");
+	                return;
+	            }
+
+	            if (issuedCount >= 3) {
+	                JOptionPane.showMessageDialog(f, "Issue Limit Reached (Max 3 Books)");
+	                return;
+	            }
+
+	            switch (id) {
+	                case 1:
+	                    if (javaStock > 0) { javaStock--; issuedCount++;
+	                        JOptionPane.showMessageDialog(f,"Java Programming Issued\nRemaining: "+javaStock);
+	                    } else { JOptionPane.showMessageDialog(f,"Java Programming Out of Stock"); }
+	                    break;
+	                case 2:
+	                    if (pythonStock > 0) { pythonStock--; issuedCount++;
+	                        JOptionPane.showMessageDialog(f,"Python Basics Issued\nRemaining: "+pythonStock);
+	                    } else { JOptionPane.showMessageDialog(f,"Python Basics Out of Stock"); }
+	                    break;
+	                case 3:
+	                    if (dsStock > 0) { dsStock--; issuedCount++;
+	                        JOptionPane.showMessageDialog(f,"Data Structures Issued\nRemaining: "+dsStock);
+	                    } else { JOptionPane.showMessageDialog(f,"Data Structures Out of Stock"); }
+	                    break;
+	                case 4:
+	                    if (dbmsStock > 0) { dbmsStock--; issuedCount++;
+	                        JOptionPane.showMessageDialog(f,"DBMS Issued\nRemaining: "+dbmsStock);
+	                    } else { JOptionPane.showMessageDialog(f,"DBMS Out of Stock"); }
+	                    break;
+	                default:
+	                    JOptionPane.showMessageDialog(f,"Book ID Not Found");
+	            }
+	        });
+
+	        back.addActionListener(e -> { f.dispose(); menuPage(); });
+
+	        f.setSize(400, 200);
+	        f.setVisible(true);
+	    }
+
+	    // ================= RETURN BOOK + FINE =================
+	    public static void returnBook() {
+	        JFrame f = new JFrame("Return Book");
+	        f.setLayout(null);
+
+	        JLabel l1 = new JLabel("Book ID:");
+	        l1.setBounds(50, 30, 150, 30);
+	        f.add(l1);
+
+	        JTextField bookId = new JTextField();
+	        bookId.setBounds(200, 30, 100, 30);
+	        f.add(bookId);
+
+	        JLabel l2 = new JLabel("Due Day:");
+	        l2.setBounds(50, 70, 150, 30);
+	        f.add(l2);
+
+	        JTextField due = new JTextField();
+	        due.setBounds(200, 70, 100, 30);
+	        f.add(due);
+
+	        JLabel l3 = new JLabel("Return Day:");
+	        l3.setBounds(50, 110, 150, 30);
+	        f.add(l3);
+
+	        JTextField ret = new JTextField();
+	        ret.setBounds(200, 110, 100, 30);
+	        f.add(ret);
+
+	        JButton submit = new JButton("Return");
+	        submit.setBounds(70, 160, 100, 30);
+	        f.add(submit);
+
+	        JButton back = new JButton("Back");
+	        back.setBounds(200, 160, 100, 30);
+	        f.add(back);
+
+	        submit.addActionListener(e -> {
+	            int id;
+	            try { id = Integer.parseInt(bookId.getText()); }
+	            catch(Exception ex){ JOptionPane.showMessageDialog(f,"Invalid Book ID"); return; }
+
+	            // Increase stock on return
+	            switch(id){
+	                case 1: javaStock++; break;
+	                case 2: pythonStock++; break;
+	                case 3: dsStock++; break;
+	                case 4: dbmsStock++; break;
+	            }
+
+	            if (issuedCount > 0) issuedCount--; // decrease user issued count
+
+	            try {
+	                int d1 = Integer.parseInt(due.getText());
+	                int d2 = Integer.parseInt(ret.getText());
+	                if (d2 > d1) {
+	                    int fine = (d2 - d1) * 10;
+	                    JOptionPane.showMessageDialog(f,"Late Return!\nFine: ₹"+fine);
+	                } else {
+	                    JOptionPane.showMessageDialog(f,"Returned On Time\nNo Fine");
+	                }
+	            } catch(Exception ex){
+	                JOptionPane.showMessageDialog(f,"Invalid Day Input");
+	            }
+	        });
+             
+	        back.addActionListener(e -> { f.dispose(); menuPage(); });
+
+	        f.setSize(420, 270);
+	        f.setVisible(true);
+	    }
+
+	    // ================= MAIN =================
+	    public static void main(String[] args) {
+	        loginPage();
+	    }
+	}
